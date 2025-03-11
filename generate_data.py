@@ -479,7 +479,7 @@ if __name__ == "__main__":
     
     # Run a simulation for 5 minutes
     passenger_requests, driver_updates = generator.run_simulation(
-        duration_seconds=60,  # 5 minutes
+        duration_seconds=300,
         events_per_second=10
     )
     
