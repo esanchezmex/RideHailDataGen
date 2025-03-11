@@ -1,0 +1,186 @@
+{
+  "type": "record",
+  "name": "PassengerRequest",
+  "namespace": "com.example.ridehailing",
+  "fields": [
+    {
+      "name": "request_id",
+      "type": "string",
+      "doc": "Unique ID for this request"
+    },
+    {
+      "name": "passenger_id",
+      "type": "string",
+      "doc": "Unique identifier of the passenger"
+    },
+    {
+      "name": "timestamp",
+      "type": "long",
+      "doc": "Epoch time (milliseconds) when the request was created"
+    },
+    {
+      "name": "pickup_location",
+      "type": {
+        "type": "record",
+        "name": "Location",
+        "fields": [
+          { "name": "latitude", "type": "double" },
+          { "name": "longitude", "type": "double" }
+        ]
+      },
+      "doc": "Nested record to store pickup latitude, longitude, and optional address"
+    },
+    {
+      "name": "dropoff_location",
+      "type": "Location",
+      "doc": "Reusing the same 'Location' record for dropoff details"
+    },
+    {
+      "name": "vehicle_type",
+      "type": {
+        "type": "enum",
+        "name": "VehicleType",
+        "symbols": [
+          "ECONOMY",
+          "STANDARD",
+          "LUXURY",
+          "POOL",
+          "SUV",
+          "ELECTRIC"
+        ]
+      },
+      "doc": "Enum for various ride options"
+    },
+    {
+      "name": "passenger_preferences",
+      "type": {
+        "type": "record",
+        "name": "PassengerPreferences",
+        "fields": [
+          {
+            "name": "music",
+            "type": {
+              "type": "enum",
+              "name": "MusicPreference",
+              "symbols": [
+                "NO_PREFERENCE",
+                "POP",
+                "ROCK",
+                "CLASSICAL",
+                "JAZZ",
+                "HIP_HOP"
+              ]
+            },
+            "default": "NO_PREFERENCE"
+          },
+          {
+            "name": "temperature",
+            "type": "int",
+            "default": 22,
+            "doc": "Desired in-car temperature in Celsius"
+          },
+          {
+            "name": "quiet_ride",
+            "type": "boolean",
+            "default": false,
+            "doc": "Passenger wants minimal conversation"
+          }
+        ]
+      },
+      "doc": "Nested record for passenger preferences"
+    },
+    {
+      "name": "payment_info",
+      "type": {
+        "type": "record",
+        "name": "PaymentInfo",
+        "fields": [
+          {
+            "name": "payment_method",
+            "type": {
+              "type": "enum",
+              "name": "PaymentMethod",
+              "symbols": [
+                "CASH",
+                "CREDIT_CARD",
+                "DEBIT_CARD",
+                "PAYPAL",
+                "APPLE_PAY",
+                "GOOGLE_PAY"
+              ]
+            }
+          },
+          {
+            "name": "coupon_codes",
+            "type": {
+              "type": "array",
+              "items": "string"
+            },
+            "default": [],
+            "doc": "Any coupon codes the passenger applied"
+          },
+          {
+            "name": "loyalty_points_used",
+            "type": ["null", "int"],
+            "default": null,
+            "doc": "Points redeemed from a loyalty program"
+          }
+        ]
+      },
+      "doc": "Payment details including method and any discounts/loyalty usage"
+    },
+    {
+      "name": "estimated_fare",
+      "type": "float",
+      "doc": "Estimated fare in the local currency"
+    },
+    {
+      "name": "text_messages",
+      "type": {
+        "type": "array",
+        "items": {
+          "type": "record",
+          "name": "TextMessage",
+          "fields": [
+            {
+              "name": "message_id",
+              "type": "string",
+              "doc": "Unique ID for each message"
+            },
+            {
+              "name": "sender",
+              "type": {
+                "type": "enum",
+                "name": "SenderType",
+                "symbols": [
+                  "DRIVER",
+                  "PASSENGER",
+                  "SYSTEM"
+                ]
+              },
+              "doc": "Who sent the message"
+            },
+            {
+              "name": "content",
+              "type": "string",
+              "doc": "Text content of the message"
+            },
+            {
+              "name": "sent_at",
+              "type": "long",
+              "doc": "Epoch time (milliseconds) when the message was sent"
+            }
+          ]
+        }
+      },
+      "default": [],
+      "doc": "List of text messages exchanged between driver and passenger"
+    },
+    {
+      "name": "driver_rating",
+      "type": ["null", "float"],
+      "default": null,
+      "doc": "Optional rating that passenger gave on a previous ride (for predictive analytics)"
+    }
+  ]
+}
