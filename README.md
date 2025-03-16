@@ -8,7 +8,7 @@ This tool is designed for:
 - Simulating driver-passenger scenarios
 - Analyzing patterns in ride-hailing services
 
-##Features
+## Features
 - Simulates a dynamic city environment with configurable parameters
 - Generates drivers with different vehicle types (Economy, Luxury, Pool, SUV)
 - Creates passengers with randomized preferences
