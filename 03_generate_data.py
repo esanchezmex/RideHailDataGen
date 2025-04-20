@@ -8,10 +8,18 @@ import io
 import fastavro
 from openai import OpenAI
 import os
+from azure.eventhub import EventHubProducerClient, EventData
+
 
 # OpenAI.api_key = os.getenv("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")
 
 client = OpenAI(api_key="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")
+
+
+# EventHub configuration
+CONNECTION_STRING = os.environ.get("EVENTHUB_CONNECTION_STRING")
+PASSENGER_EVENTHUB_NAME = os.environ.get("PASSENGER_EVENTHUB_NAME", "passenger-requests")
+DRIVER_EVENTHUB_NAME = os.environ.get("DRIVER_EVENTHUB_NAME", "driver-updates")
 
 
 def generate_system_message(passenger_id: str) -> str:
@@ -121,18 +129,48 @@ DRIVER_UPDATE_SCHEMA = {
     ]
 }
 
+
+passenger_producer = EventHubProducerClient.from_connection_string(
+    conn_str=CONNECTION_STRING, 
+    eventhub_name=PASSENGER_EVENTHUB_NAME
+)
+driver_producer = EventHubProducerClient.from_connection_string(
+    conn_str=CONNECTION_STRING, 
+    eventhub_name=DRIVER_EVENTHUB_NAME
+)
+
 def store_passenger_request(record):
-    with open("passenger_requests.jsonl", "a", encoding="utf-8") as f_json:
-        f_json.write(json.dumps(record, ensure_ascii=False) + "\n")
-    with open("passenger_requests.avro", "ab") as f_avro:
-        fastavro.schemaless_writer(f_avro, PASSENGER_REQUEST_SCHEMA, record)
+    try:
+        # Serialize to AVRO
+        bytes_writer = io.BytesIO()
+        fastavro.schemaless_writer(bytes_writer, PASSENGER_REQUEST_SCHEMA, record)
+        avro_data = bytes_writer.getvalue()
+        
+        # Send to EventHub
+        event_data_batch = passenger_producer.create_batch()
+        event_data_batch.add(EventData(avro_data))
+        passenger_producer.send_batch(event_data_batch)
+        print(f"[EventHub] Sent passenger request {record['request_id']}")
+    except Exception as e:
+        print(f"[EventHub] Error: {e}")
 
 
 def store_driver_update(record):
-    with open("driver_updates.jsonl", "a") as f_json:
-        f_json.write(json.dumps(record) + "\n")
-    with open("driver_updates.avro", "ab") as f_avro:
-        fastavro.schemaless_writer(f_avro, DRIVER_UPDATE_SCHEMA, record)
+    try:
+        # Serialize to AVRO
+        bytes_writer = io.BytesIO()
+        fastavro.schemaless_writer(bytes_writer, DRIVER_UPDATE_SCHEMA, record)
+        avro_data = bytes_writer.getvalue()
+        
+        # Send to EventHub
+        event_data_batch = driver_producer.create_batch()
+        event_data_batch.add(EventData(avro_data))
+        driver_producer.send_batch(event_data_batch)
+        print(f"[EventHub] Sent driver update for {record['driver_id']}")
+    except Exception as e:
+        print(f"[EventHub] Error: {e}")
+
+
 
 class City:
     def __init__(self, city_center, city_radius, drivers, passengers, base_speed=30):
