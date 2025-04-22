@@ -30,7 +30,6 @@ except Exception as e:
     st.error(f"❌ Could not load data: {e}")
     st.stop()
 
-
 # Filters
 if "city" in data.columns:
     city_filter = st.selectbox("Select a City", data["city"].unique())
