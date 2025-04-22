@@ -8,8 +8,8 @@ import time
 
 # Azure Blob Storage Configuration
 AZURE_CONNECTION_STRING = os.environ["AZURE_CONNECTION_STRING"]
-CONTAINER_NAME = "<YOUR_CONTAINER_NAME>"
-BLOB_NAME = "<YOUR_PARQUET_FILE>.parquet"
+CONTAINER_NAME = os.environ.get("CONTAINER_NAME")
+BLOB_NAME = os.environ.get("BLOB_NAME")
 
 # Function to load data from Azure Blob Storage
 def load_data():
