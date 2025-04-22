@@ -7,7 +7,7 @@ import io
 import time
 
 # Azure Blob Storage Configuration
-AZURE_CONNECTION_STRING = os.environ["AZURE_CONNECTION_STRING"]
+AZURE_CONNECTION_STRING = os.environ.get("AZURE_CONNECTION_STRING")
 CONTAINER_NAME = os.environ.get("CONTAINER_NAME")
 BLOB_NAME = os.environ.get("BLOB_NAME")
 
@@ -19,12 +19,17 @@ def load_data():
     data = pd.read_parquet(io.BytesIO(download_stream.readall()))
     return data
 
-st.experimental_set_query_params(refresh=time.time())
-st.title("🚖 Real-Time Ride-Hailing Dashboard")
-st.markdown("Live insights into rides, drivers, and passenger activity.")
+# Load data with fallback
+try:
+    if AZURE_CONNECTION_STRING and CONTAINER_NAME and BLOB_NAME:
+        data = load_data()
+    else:
+        st.warning("⚠️ Azure config not found. Using sample data.")
+        data = pd.read_csv("sample_rides.csv")  # or .parquet if that's your sample format
+except Exception as e:
+    st.error(f"❌ Could not load data: {e}")
+    st.stop()
 
-# Load data
-data = load_data()
 
 # Filters
 if "city" in data.columns:
