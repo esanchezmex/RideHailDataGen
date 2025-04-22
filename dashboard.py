@@ -25,7 +25,7 @@ try:
         data = load_data()
     else:
         st.warning("⚠️ Azure config not found. Using sample data.")
-        data = pd.read_csv("sample_rides.csv")  # or .parquet if that's your sample format
+        data = pd.read_csv("sample_rides.csv") 
 except Exception as e:
     st.error(f"❌ Could not load data: {e}")
     st.stop()
