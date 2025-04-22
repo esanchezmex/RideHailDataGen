@@ -11,24 +11,22 @@ AZURE_CONNECTION_STRING = os.environ.get("AZURE_CONNECTION_STRING")
 CONTAINER_NAME = os.environ.get("CONTAINER_NAME")
 BLOB_NAME = os.environ.get("BLOB_NAME")
 
-# Function to load data from Azure Blob Storage
+# Function to load data from Azure Blob Storage or fallback to CSV
 def load_data():
-    blob_service_client = BlobServiceClient.from_connection_string(AZURE_CONNECTION_STRING)
-    blob_client = blob_service_client.get_blob_client(container=CONTAINER_NAME, blob=BLOB_NAME)
-    download_stream = blob_client.download_blob()
-    data = pd.read_parquet(io.BytesIO(download_stream.readall()))
-    return data
+    try:
+        if AZURE_CONNECTION_STRING and CONTAINER_NAME and BLOB_NAME:
+            blob_service_client = BlobServiceClient.from_connection_string(AZURE_CONNECTION_STRING)
+            blob_client = blob_service_client.get_blob_client(container=CONTAINER_NAME, blob=BLOB_NAME)
+            download_stream = blob_client.download_blob()
+            return pd.read_parquet(io.BytesIO(download_stream.readall()))
+        else:
+            raise ValueError("Missing Azure config")
+    except Exception as e:
+        st.warning(f"⚠️ Falling back to sample CSV. Reason: {e}")
+        return pd.read_csv("sample_rides.csv")
 
-# Load data with fallback
-try:
-    if AZURE_CONNECTION_STRING and CONTAINER_NAME and BLOB_NAME:
-        data = load_data()
-    else:
-        st.warning("⚠️ Azure config not found. Using sample data.")
-        data = pd.read_csv("sample_rides.csv") 
-except Exception as e:
-    st.error(f"❌ Could not load data: {e}")
-    st.stop()
+# Load data
+data = load_data()
 
 # Filters
 if "city" in data.columns:
