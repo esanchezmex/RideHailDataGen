@@ -1,4 +1,5 @@
 import streamlit as st
+import os
 import pandas as pd
 import plotly.express as px
 from azure.storage.blob import BlobServiceClient
@@ -6,7 +7,7 @@ import io
 import time
 
 # Azure Blob Storage Configuration
-AZURE_CONNECTION_STRING = "<YOUR_AZURE_BLOB_CONNECTION_STRING>"
+AZURE_CONNECTION_STRING = os.environ["AZURE_CONNECTION_STRING"]
 CONTAINER_NAME = "<YOUR_CONTAINER_NAME>"
 BLOB_NAME = "<YOUR_PARQUET_FILE>.parquet"
 
