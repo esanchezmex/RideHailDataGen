@@ -55,35 +55,7 @@ with intermediate:
     if "payment_method" in data.columns:
         st.bar_chart(data["payment_method"].value_counts())
 
-    st.subheader("📈 Average Response Time by Vehicle Type Over Time")
-    if {"request_timestamp", "accepted_timestamp", "vehicle_type"}.issubset(data.columns):
-        data["request_timestamp"] = pd.to_datetime(data["request_timestamp"], unit="ms", errors="coerce")
-        data["accepted_timestamp"] = pd.to_datetime(data["accepted_timestamp"], unit="ms", errors="coerce")
-        data["response_time"] = (data["accepted_timestamp"] - data["request_timestamp"]).dt.total_seconds()
-
-        valid_data = data.dropna(subset=["response_time", "vehicle_type", "request_timestamp"])
-        valid_data = valid_data[valid_data["response_time"] >= 0]
-        valid_data["hour"] = valid_data["request_timestamp"].dt.floor("H")
-
-        recent_hours = st.slider("Select how many recent hours to include", 1, 48, 12)
-        latest_time = valid_data["hour"].max()
-        filtered = valid_data[valid_data["hour"] >= latest_time - pd.Timedelta(hours=recent_hours)]
-
-        response_time_summary = (
-            filtered.groupby(["hour", "vehicle_type"])["response_time"]
-            .mean().reset_index()
-        )
-
-        fig = px.line(
-            response_time_summary,
-            x="hour",
-            y="response_time",
-            color="vehicle_type",
-            labels={"hour": "Time", "response_time": "Avg. Response Time (s)"},
-            title="📈 Average Response Time per Vehicle Type"
-        )
-        st.plotly_chart(fig, use_container_width=True)
-
+    
 # 📊 Advanced Analytics
 with advanced:
     st.subheader("Rating Distribution")
