@@ -1,4 +1,9 @@
-streamlit
+fastavro
+numpy
 pandas
+confluent_kafka
+pyspark
+findspark
+streamlit
 plotly
 azure-storage-blob
