@@ -56,5 +56,27 @@ The data generator simulates interactions between passengers and drivers. It:
 - `azure-storage-blob`: Azure Blob Storage integration for storing stream outputs  
 
 ## Usage Guidance
+To run, please begin by running the producer with the desired set of specifications. Please use the given schemas in order to run the producer without issues.
+Proceed to run the consumer_WithPrints.ipynb to perform analytics from the data being generated and streamed. Then, run the consumerWithBlob.ipynb to save the output of the analytics to Blob storage.
 
+Note: Keys have been made private for added security. Use the environment file to access them.
+
+## File Explanations
+### M1_01_driver_availability_schema.txt
+This file defines the AVRO schema for driver availability updates. It captures each driver's ID, location (latitude and longitude), current status (e.g., AVAILABLE, ON_RIDE), and timestamp, enabling real-time tracking and operational analytics.
+
+### M1_02_passenger_request_schema.txt
+This file defines the AVRO schema for passenger ride requests. It includes identifiers, pickup/dropoff coordinates, vehicle preferences, passenger preferences (music, temperature, quiet ride), payment info, fare estimates, text message exchanges, and optional driver ratings. This schema enables simulation of realistic user behavior and supports in-depth analytics across request patterns, satisfaction, and communication flows.
+
+### M1_03_generate_data.py
+This script initializes and runs a full simulation of a virtual ride-hailing city. It creates dynamic passengers and drivers, simulates ride requests, driver movements, pricing updates, and traffic conditions. It generates and sends real-time passenger and driver events serialized in AVRO to Azure EventHub. AI-generated messages and AVRO schemas are included for realistic, analytics-ready data streaming.
+
+### dashboard.py
+This Streamlit dashboard visualizes real-time analytics for the ride-hailing simulation. It integrates data from GitHub-hosted CSVs, displays key metrics like total rides and cancellations, and presents interactive visualizations using Plotly and Pydeck. The dashboard includes basic, intermediate, and advanced analytics, along with heatmaps and route maps for pickup and dropoff locations.
+
+### drivers.csv
+This file contains structured, simulation-generated data about driver profiles and ride activity. It includes fields such as `driver_id`, `vehicle_type`, `status`, and GPS coordinates. The file is automatically pushed from Azure Blob Storage to GitHub and is used by the Streamlit dashboard to display real-time driver-related analytics and visualizations.
+
+### passengers.csv
+This file stores simulation-generated passenger ride request data, including fields like `passenger_id`, `pickup` and `dropoff` coordinates, ride status, preferences, and payment methods. Like `drivers.csv`, it is automatically synced from Azure Blob Storage to GitHub to enable live data analysis within the Streamlit dashboard.
 
