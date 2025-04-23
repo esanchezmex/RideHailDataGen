@@ -18,8 +18,8 @@ client = OpenAI(api_key=openai_api_key)
 
 # EventHub configuration
 CONNECTION_STRING = os.environ.get("EVENTHUB_CONNECTION_STRING")
-PASSENGER_EVENTHUB_NAME = os.environ.get("PASSENGER_EVENTHUB_NAME", "passenger-requests")
-DRIVER_EVENTHUB_NAME = os.environ.get("DRIVER_EVENTHUB_NAME", "driver-updates")
+PASSENGER_EVENTHUB_NAME = os.environ.get("passengers_eventhub_name", "passenger-requests")
+DRIVER_EVENTHUB_NAME = os.environ.get("drivers_eventhub_name", "driver-updates")
 
 
 def generate_system_message(passenger_id: str) -> str:
