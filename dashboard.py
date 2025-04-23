@@ -3,9 +3,10 @@ import pandas as pd
 import plotly.express as px
 import time
 
-# GitHub raw CSV URLs (replace with your actual GitHub URLs)
-drivers_url = "https://raw.githubusercontent.com/your-username/your-repo/main/drivers.csv"
-passengers_url = "https://raw.githubusercontent.com/your-username/your-repo/main/passengers.csv"
+# GitHub raw CSV URLs 
+drivers_url = "https://raw.githubusercontent.com/esanchezmex/RideHailDataGen/main/drivers.csv"
+passengers_url = "https://raw.githubusercontent.com/esanchezmex/RideHailDataGen/main/passengers.csv"
+
 
 # Load data from GitHub
 df_drivers = pd.read_csv(drivers_url)
