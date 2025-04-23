@@ -1,23 +1,24 @@
 import streamlit as st
 import pandas as pd
+import pydeck as pdk
 
 # GitHub CSV URLs
 drivers_url = "https://raw.githubusercontent.com/esanchezmex/RideHailDataGen/main/drivers.csv"
 passengers_url = "https://raw.githubusercontent.com/esanchezmex/RideHailDataGen/main/passengers.csv"
 
-# Load CSVs
+# Load data
 df_drivers = pd.read_csv(drivers_url)
 df_passengers = pd.read_csv(passengers_url)
 
-# Merge and normalize
+# Merge and clean
 data = pd.merge(df_passengers, df_drivers, on="driver_id", how="left", suffixes=("", "_driver"))
 data["status"] = data["status"].astype(str).str.upper()
 
-# Streamlit setup
+# Streamlit UI
 st.set_page_config(page_title="Ride-Hailing Dashboard", layout="wide")
 st.title("🚖 Ride-Hailing Analytics Dashboard")
 
-# Key Metrics
+# 📊 Key Metrics
 st.header("📊 Key Metrics")
 total_rides = len(data)
 completed_rides = len(data[data["status"] == "COMPLETED"])
@@ -28,12 +29,12 @@ st.metric("Total Rides", total_rides)
 st.metric("Completed Rides", completed_rides)
 st.metric("Cancellation Rate", f"{cancel_rate:.2f}%")
 
-# Tabs
+# 📁 Tabs
 basic, intermediate, advanced, maps = st.tabs([
     "Basic Analytics", "Intermediate Analytics", "Advanced Analytics", "📍 Location Maps"
 ])
 
-# Basic Analytics
+# 📊 Basic Analytics
 with basic:
     st.subheader("Rides by Status")
     st.bar_chart(data["status"].value_counts())
@@ -42,7 +43,7 @@ with basic:
     if "vehicle_type" in data.columns:
         st.bar_chart(data["vehicle_type"].value_counts())
 
-# Intermediate Analytics
+# 📈 Intermediate Analytics
 with intermediate:
     st.subheader("Average Ride Duration by Vehicle Type")
     if "ride_duration" in data.columns and "vehicle_type" in data.columns:
@@ -53,7 +54,7 @@ with intermediate:
     if "payment_method" in data.columns:
         st.bar_chart(data["payment_method"].value_counts())
 
-# Advanced Analytics
+# 📊 Advanced Analytics
 with advanced:
     st.subheader("Rating Distribution")
     if "driver_rating" in data.columns:
@@ -80,3 +81,37 @@ with maps:
             columns={"dropoff_latitude": "latitude", "dropoff_longitude": "longitude"}
         )
         st.map(dropoff_map)
+
+    st.subheader("🚦 Ride Route Paths")
+    if {
+        "pickup_latitude", "pickup_longitude",
+        "dropoff_latitude", "dropoff_longitude"
+    }.issubset(data.columns):
+        routes = data[[
+            "pickup_latitude", "pickup_longitude",
+            "dropoff_latitude", "dropoff_longitude"
+        ]].dropna().copy()
+
+        routes = routes.rename(columns={
+            "pickup_latitude": "start_lat", "pickup_longitude": "start_lng",
+            "dropoff_latitude": "end_lat", "dropoff_longitude": "end_lng"
+        })
+
+        layer = pdk.Layer(
+            "LineLayer",
+            routes,
+            get_source_position='[start_lng, start_lat]',
+            get_target_position='[end_lng, end_lat]',
+            get_width=2,
+            get_color=[255, 100, 100],
+            pickable=True
+        )
+
+        midpoint = (routes["start_lat"].mean(), routes["start_lng"].mean())
+        view_state = pdk.ViewState(latitude=midpoint[0], longitude=midpoint[1], zoom=11, pitch=0)
+
+        st.pydeck_chart(pdk.Deck(
+            map_style='mapbox://styles/mapbox/light-v9',
+            initial_view_state=view_state,
+            layers=[layer]
+        ))
