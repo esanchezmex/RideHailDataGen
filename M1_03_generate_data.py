@@ -10,11 +10,11 @@ from openai import OpenAI
 import os
 from azure.eventhub import EventHubProducerClient, EventData
 
+openai_api_key = os.environ.get("OPENAI_API_KEY")
+if openai_api_key is None:
+    raise ValueError("Missing OpenAI API key. Set the OPENAI_API_KEY environment variable.")
 
-# OpenAI.api_key = os.getenv("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")
-
-client = OpenAI(api_key="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")
-
+client = OpenAI(api_key=openai_api_key)
 
 # EventHub configuration
 CONNECTION_STRING = os.environ.get("EVENTHUB_CONNECTION_STRING")
