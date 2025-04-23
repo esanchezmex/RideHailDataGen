@@ -69,8 +69,14 @@ with advanced:
 with maps:
     st.subheader("Pickup Locations")
     if {"pickup_latitude", "pickup_longitude"}.issubset(data.columns):
-        st.map(data[["pickup_latitude", "pickup_longitude"]].dropna())
+        pickup_map = data[["pickup_latitude", "pickup_longitude"]].dropna().rename(
+            columns={"pickup_latitude": "latitude", "pickup_longitude": "longitude"}
+        )
+        st.map(pickup_map)
 
     st.subheader("Dropoff Locations")
     if {"dropoff_latitude", "dropoff_longitude"}.issubset(data.columns):
-        st.map(data[["dropoff_latitude", "dropoff_longitude"]].dropna())
+        dropoff_map = data[["dropoff_latitude", "dropoff_longitude"]].dropna().rename(
+            columns={"dropoff_latitude": "latitude", "dropoff_longitude": "longitude"}
+        )
+        st.map(dropoff_map)
