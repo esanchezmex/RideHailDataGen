@@ -11,31 +11,8 @@ RideHailDataGen enables teams to prototype and test stream processing architectu
 - Creating datasets for machine learning model training and testing  
 - Simulating diverse supply-demand scenarios and rider behavior  
 - Powering real-time stream ingestion, processing, and storage solutions  
-- Supporting anomaly detection, surge pricing prediction, and other business-critical analytics  
+- Supporting business-critical analytics  
 - Driving dashboards and business insights to optimize ride-hailing operations
-
-## Business Use Cases
-
-This tool supports a wide range of analytics and operational insights, such as:
-
-- **Demand Forecasting:** Predict future ride demand by time and location to optimize driver deployment  
-- **Geo Heatmaps:** Visualize hotspots for ride requests, cancellations, and idle drivers  
-- **Fleet Monitoring:** Track driver activity (idle, assigned, en route) in real time  
-- **Cancellation Analysis:** Understand cancellation rates, causes (e.g., ETA, pricing), and user types  
-- **Dynamic Pricing Testing:** Simulate pricing models under varying demand to validate surge logic  
-- **Anomaly Detection:** Detect fraudulent patterns such as spoofed rides or excessive cancellations  
-- **Response Time Metrics:** Measure time from ride request to driver assignment  
-- **Streaming Dashboards:** Feed real-time metrics into BI platforms like Power BI or Grafana  
-
-## Key Features
-
-- Configurable virtual city with adjustable radius and population density  
-- Heterogeneous driver fleet (Economy, Luxury, SUV, Pool)  
-- Probabilistic rider preferences and time-based behavior changes  
-- Time-of-day traffic modeling with surge simulation  
-- AI-generated rider text messages using the OpenAI API  
-- Real-time serialization in both AVRO and JSON formats  
-- Multi-threaded simulation for realistic concurrent behavior  
 
 ## Passenger and Driver Schemas
 
@@ -63,21 +40,21 @@ The data generator simulates interactions between passengers and drivers. It:
 
 ## Dependencies
 
-- `openai`: For generating realistic passenger messages  
 - `fastavro`: AVRO schema validation and serialization  
-- `numpy`, `pandas`: Time-series simulation and probabilistic modeling  
-- `streamlit`: Interactive dashboard for monitoring and visualization  
-- `plotly`: Interactive geographic and temporal charts  
-- `azure-storage-blob`: Integration with Azure Blob Storage for stream output  
-- `threading`: Enables concurrent simulation of multiple users and events  
+- `numpy`, `math`: Probabilistic modeling and calculations  
+- `pandas`: Data structuring and time manipulation  
+- `datetime`, `time`: Timestamp generation and delay control  
+- `threading`: Concurrent event simulation  
+- `json`: Serialization to JSON format  
+- `os`, `shutil`, `glob`, `subprocess`: File system interactions and utility tasks  
+- `getpass`: Credential handling for secure authentication  
+- `confluent_kafka`: Kafka producer for stream publishing  
+- `pyspark`: Spark Streaming for real-time data processing  
+- `findspark`: Enables Spark usage within Jupyter/Colab environments  
+- `streamlit`: Dashboarding (optional)  
+- `plotly`: Visualization of metrics and geographic data  
+- `azure-storage-blob`: Azure Blob Storage integration for storing stream outputs  
 
-## Usage Example
+## Usage Guidance
 
-```python
-city_center = (40, -74)  # NYC-like coordinates
-city_radius = 15         # in kilometers
-drivers = [Driver(f"D{i:05d}", city_center, city_radius) for i in range(350)]
-passengers = [Passenger(f"P{i:05d}", city_center, city_radius) for i in range(650)]
-city = City(city_center, city_radius, drivers, passengers)
-city.run_simulation(duration_seconds=300, request_interval=2)
-```
+
