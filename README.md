@@ -62,14 +62,23 @@ Proceed to run the consumer_WithPrints.ipynb to perform analytics from the data 
 Note: Keys have been made private for added security. Use the environment file to access them.
 
 ## File Explanations
-### M1_01_driver_availability_schema.txt
+### M1_01_driver_availability_schema.txt (Milestone 1)
 This file defines the AVRO schema for driver availability updates. It captures each driver's ID, location (latitude and longitude), current status (e.g., AVAILABLE, ON_RIDE), and timestamp, enabling real-time tracking and operational analytics.
 
-### M1_02_passenger_request_schema.txt
+### M1_02_passenger_request_schema.txt (Milestone 1)
 This file defines the AVRO schema for passenger ride requests. It includes identifiers, pickup/dropoff coordinates, vehicle preferences, passenger preferences (music, temperature, quiet ride), payment info, fare estimates, text message exchanges, and optional driver ratings. This schema enables simulation of realistic user behavior and supports in-depth analytics across request patterns, satisfaction, and communication flows.
 
-### M1_03_generate_data.py
+### M1_03_generate_data.py (Milestone 1)
 This script initializes and runs a full simulation of a virtual ride-hailing city. It creates dynamic passengers and drivers, simulates ride requests, driver movements, pricing updates, and traffic conditions. It generates and sends real-time passenger and driver events serialized in AVRO to Azure EventHub. AI-generated messages and AVRO schemas are included for realistic, analytics-ready data streaming.
+
+### Producer.ipynb
+This the data generation file from Milestone 1 but it is enhanced to integrate Spark and Kafka functionalities to send data to EventHub while keeping the realism from the original simulation. 
+
+### ConsumerWithBlob.ipynb
+The consumer takes data from EventHub and performs a serious of Spark SQL-based queries in order to generate value for our business. It proceeds to send those results to a Blob storage container to lay those results at rest.
+
+### Consumer_WithPrints.ipynb
+Then, it proceeds to print those results for user visualizaiton and send them to Streamlit for real-time visualization.
 
 ### dashboard.py
 This Streamlit dashboard visualizes real-time analytics for the ride-hailing simulation. It integrates data from GitHub-hosted CSVs, displays key metrics like total rides and cancellations, and presents interactive visualizations using Plotly and Pydeck. The dashboard includes basic, intermediate, and advanced analytics, along with heatmaps and route maps for pickup and dropoff locations.
