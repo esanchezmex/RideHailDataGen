@@ -9,22 +9,19 @@ passengers_url = "https://raw.githubusercontent.com/esanchezmex/RideHailDataGen/
 df_drivers = pd.read_csv(drivers_url)
 df_passengers = pd.read_csv(passengers_url)
 
-# Merge on driver_id and preserve passenger columns
+# Merge and normalize
 data = pd.merge(df_passengers, df_drivers, on="driver_id", how="left", suffixes=("", "_driver"))
+data["status"] = data["status"].astype(str).str.upper()
 
-# Normalize the status column
-if "status" in data.columns:
-    data["status"] = data["status"].astype(str).str.upper()
-
-# Streamlit app layout
+# Streamlit setup
 st.set_page_config(page_title="Ride-Hailing Dashboard", layout="wide")
 st.title("🚖 Ride-Hailing Analytics Dashboard")
 
 # Key Metrics
 st.header("📊 Key Metrics")
 total_rides = len(data)
-completed_rides = len(data[data["status"] == "COMPLETED"]) if "status" in data.columns else 0
-cancelled_rides = len(data[data["status"] == "CANCELLED"]) if "status" in data.columns else 0
+completed_rides = len(data[data["status"] == "COMPLETED"])
+cancelled_rides = len(data[data["status"] == "CANCELLED"])
 cancel_rate = (cancelled_rides / total_rides * 100) if total_rides > 0 else 0
 
 st.metric("Total Rides", total_rides)
@@ -32,13 +29,14 @@ st.metric("Completed Rides", completed_rides)
 st.metric("Cancellation Rate", f"{cancel_rate:.2f}%")
 
 # Tabs
-basic, intermediate, advanced = st.tabs(["Basic Analytics", "Intermediate Analytics", "Advanced Analytics"])
+basic, intermediate, advanced, maps = st.tabs([
+    "Basic Analytics", "Intermediate Analytics", "Advanced Analytics", "📍 Location Maps"
+])
 
 # Basic Analytics
 with basic:
     st.subheader("Rides by Status")
-    if "status" in data.columns:
-        st.bar_chart(data["status"].value_counts())
+    st.bar_chart(data["status"].value_counts())
 
     st.subheader("Rides by Vehicle Type")
     if "vehicle_type" in data.columns:
@@ -47,7 +45,7 @@ with basic:
 # Intermediate Analytics
 with intermediate:
     st.subheader("Average Ride Duration by Vehicle Type")
-    if "duration" in data.columns and "vehicle_type" in data.columns:
+    if "ride_duration" in data.columns and "vehicle_type" in data.columns:
         avg_duration = data.groupby("vehicle_type")["ride_duration"].mean()
         st.bar_chart(avg_duration)
 
@@ -66,3 +64,13 @@ with advanced:
         long_rides = data[data["ride_duration"] > data["ride_duration"].quantile(0.99)]
         st.write("Top 1% longest rides:")
         st.dataframe(long_rides[["request_id", "ride_duration", "status", "driver_id", "passenger_id"]])
+
+# 📍 Location Maps
+with maps:
+    st.subheader("Pickup Locations")
+    if {"pickup_latitude", "pickup_longitude"}.issubset(data.columns):
+        st.map(data[["pickup_latitude", "pickup_longitude"]].dropna())
+
+    st.subheader("Dropoff Locations")
+    if {"dropoff_latitude", "dropoff_longitude"}.issubset(data.columns):
+        st.map(data[["dropoff_latitude", "dropoff_longitude"]].dropna())
