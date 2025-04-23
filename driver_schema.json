@@ -1,0 +1,37 @@
+{
+  "type": "record",
+  "name": "DriverAvailabilityUpdate",
+  "namespace": "com.yourcompany.ridehailing",
+  "doc": "Event representing a driver's availability/status update.",
+  "fields": [
+    {
+      "name": "driver_id",
+      "type": "string",
+      "doc": "Unique identifier for the driver."
+    },
+    {
+      "name": "timestamp",
+      "type": "long",
+      "doc": "Epoch timestamp in milliseconds indicating when the update occurred."
+    },
+    {
+      "name": "latitude",
+      "type": "double",
+      "doc": "Driver's last known GPS latitude."
+    },
+    {
+      "name": "longitude",
+      "type": "double",
+      "doc": "Driver's last known GPS longitude."
+    },
+    {
+      "name": "status",
+      "type": {
+        "type": "enum",
+        "name": "DriverStatus",
+        "symbols": ["AVAILABLE", "UNAVAILABLE", "ON_RIDE", "OFFLINE"]
+      },
+      "doc": "Driver's availability status."
+    }
+  ]
+}
