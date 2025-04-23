@@ -140,3 +140,28 @@ with maps:
         )
 
         st.pydeck_chart(pdk.Deck(layers=[route_layer], initial_view_state=route_view))
+
+    st.subheader("🚗 Active Drivers Heatmap (Past 3 Hours)")
+    if {"latitude", "longitude", "status", "timestamp"}.issubset(df_drivers.columns):
+        df_drivers["timestamp"] = pd.to_datetime(df_drivers["timestamp"], errors="coerce")
+        recent_active = df_drivers[
+            (df_drivers["status"].str.lower() == "active") &
+            (df_drivers["timestamp"] > pd.Timestamp.now() - pd.Timedelta(hours=3))
+        ].dropna(subset=["latitude", "longitude"])
+
+        if not recent_active.empty:
+            active_heatmap = pdk.Layer(
+                "HeatmapLayer",
+                recent_active.rename(columns={"latitude": "lat", "longitude": "lon"}),
+                get_position='[lon, lat]',
+                aggregation=pdk.types.String("SUM"),
+                get_weight=1
+            )
+            view_active = pdk.ViewState(
+                latitude=recent_active["latitude"].mean(),
+                longitude=recent_active["longitude"].mean(),
+                zoom=11
+            )
+            st.pydeck_chart(pdk.Deck(layers=[active_heatmap], initial_view_state=view_active))
+        else:
+            st.info("No active drivers found in the past 3 hours.")
