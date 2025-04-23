@@ -89,3 +89,9 @@ This file contains structured, simulation-generated data about driver profiles a
 ### passengers.csv
 This file stores simulation-generated passenger ride request data, including fields like `passenger_id`, `pickup` and `dropoff` coordinates, ride status, preferences, and payment methods. Like `drivers.csv`, it is automatically synced from Azure Blob Storage to GitHub to enable live data analysis within the Streamlit dashboard.
 
+### passengerschemav2.json
+This file defines the AVRO schema for passenger ride request events. It includes structured fields such as `passenger_id`, pickup and dropoff `location`, `vehicle_type`, ride `status`, passenger `preferences` (e.g., music, temperature, quiet ride), `payment_info`, optional `text_messages`, and post-ride `driver_rating`. It also includes timestamps for lifecycle tracking. This schema ensures serialization consistency and supports deep behavioral and operational analytics.
+
+### driver_schema.json
+This file defines the AVRO schema for driver availability updates. It captures core driver data, including `driver_id`, GPS `latitude` and `longitude`, `timestamp`, and availability `status` (e.g., AVAILABLE, UNAVAILABLE, ON_RIDE, OFFLINE). This structure standardizes incoming driver status messages for integration into real-time fleet monitoring and analytics.
+
