@@ -70,17 +70,47 @@ with advanced:
 with maps:
     st.subheader("Pickup Locations")
     if {"pickup_latitude", "pickup_longitude"}.issubset(data.columns):
-        pickup_map = data[["pickup_latitude", "pickup_longitude"]].dropna().rename(
-            columns={"pickup_latitude": "latitude", "pickup_longitude": "longitude"}
+        pickup_points = data[["pickup_latitude", "pickup_longitude"]].dropna().rename(
+            columns={"pickup_latitude": "lat", "pickup_longitude": "lon"}
         )
-        st.map(pickup_map)
+        st.map(pickup_points)
+
+        st.subheader("🔥 Pickup Heatmap")
+        pickup_heatmap = pdk.Layer(
+            "HeatmapLayer",
+            pickup_points,
+            get_position='[lon, lat]',
+            aggregation=pdk.types.String("SUM"),
+            get_weight=1
+        )
+        view_pickup = pdk.ViewState(
+            latitude=pickup_points["lat"].mean(),
+            longitude=pickup_points["lon"].mean(),
+            zoom=11
+        )
+        st.pydeck_chart(pdk.Deck(layers=[pickup_heatmap], initial_view_state=view_pickup))
 
     st.subheader("Dropoff Locations")
     if {"dropoff_latitude", "dropoff_longitude"}.issubset(data.columns):
-        dropoff_map = data[["dropoff_latitude", "dropoff_longitude"]].dropna().rename(
-            columns={"dropoff_latitude": "latitude", "dropoff_longitude": "longitude"}
+        dropoff_points = data[["dropoff_latitude", "dropoff_longitude"]].dropna().rename(
+            columns={"dropoff_latitude": "lat", "dropoff_longitude": "lon"}
         )
-        st.map(dropoff_map)
+        st.map(dropoff_points)
+
+        st.subheader("🔥 Dropoff Heatmap")
+        dropoff_heatmap = pdk.Layer(
+            "HeatmapLayer",
+            dropoff_points,
+            get_position='[lon, lat]',
+            aggregation=pdk.types.String("SUM"),
+            get_weight=1
+        )
+        view_dropoff = pdk.ViewState(
+            latitude=dropoff_points["lat"].mean(),
+            longitude=dropoff_points["lon"].mean(),
+            zoom=11
+        )
+        st.pydeck_chart(pdk.Deck(layers=[dropoff_heatmap], initial_view_state=view_dropoff))
 
     st.subheader("🚦 Ride Route Paths")
     if {
@@ -97,21 +127,20 @@ with maps:
             "dropoff_latitude": "end_lat", "dropoff_longitude": "end_lng"
         })
 
-        layer = pdk.Layer(
+        route_layer = pdk.Layer(
             "LineLayer",
             routes,
             get_source_position='[start_lng, start_lat]',
             get_target_position='[end_lng, end_lat]',
-            get_width=2,
-            get_color=[255, 100, 100],
-            pickable=True
+            get_width=1,
+            get_color=[255, 0, 0],
+            pickable=False
         )
 
-        midpoint = (routes["start_lat"].mean(), routes["start_lng"].mean())
-        view_state = pdk.ViewState(latitude=midpoint[0], longitude=midpoint[1], zoom=11, pitch=0)
+        route_view = pdk.ViewState(
+            latitude=routes["start_lat"].mean(),
+            longitude=routes["start_lng"].mean(),
+            zoom=11
+        )
 
-        st.pydeck_chart(pdk.Deck(
-            map_style='mapbox://styles/mapbox/light-v9',
-            initial_view_state=view_state,
-            layers=[layer]
-        ))
+        st.pydeck_chart(pdk.Deck(layers=[route_layer], initial_view_state=route_view))
