@@ -12,14 +12,14 @@ df_passengers = pd.read_csv(passengers_url)
 # Merge on driver_id
 data = pd.merge(df_passengers, df_drivers, on="driver_id", how="left")
 
-# Normalize the status values to uppercase
+# Normalize status column to uppercase
 data["status"] = data["status"].astype(str).str.upper()
 
-# Streamlit layout
+# Streamlit app layout
 st.set_page_config(page_title="Ride-Hailing Dashboard", layout="wide")
 st.title("🚖 Ride-Hailing Analytics Dashboard")
 
-# Metrics
+# Key Metrics
 st.header("📊 Key Metrics")
 total_rides = len(data)
 completed_rides = len(data[data["status"] == "COMPLETED"])
@@ -30,9 +30,10 @@ st.metric("Total Rides", total_rides)
 st.metric("Completed Rides", completed_rides)
 st.metric("Cancellation Rate", f"{cancel_rate:.2f}%")
 
-# Tabs
+# Tabs for analytics
 basic, intermediate, advanced = st.tabs(["Basic Analytics", "Intermediate Analytics", "Advanced Analytics"])
 
+# Basic Analytics
 with basic:
     st.subheader("Rides by Status")
     st.bar_chart(data["status"].value_counts())
@@ -41,6 +42,7 @@ with basic:
     if "vehicle_type" in data.columns:
         st.bar_chart(data["vehicle_type"].value_counts())
 
+# Intermediate Analytics
 with intermediate:
     st.subheader("Average Ride Duration by Vehicle Type")
     if "duration" in data.columns and "vehicle_type" in data.columns:
@@ -51,6 +53,7 @@ with intermediate:
     if "payment_method" in data.columns:
         st.bar_chart(data["payment_method"].value_counts())
 
+# Advanced Analytics
 with advanced:
     st.subheader("Rating Distribution")
     if "rating" in data.columns:
@@ -60,4 +63,4 @@ with advanced:
     if "duration" in data.columns:
         long_rides = data[data["duration"] > data["duration"].quantile(0.99)]
         st.write("Top 1% longest rides:")
-        st.dataframe(long_rides[["ride_id", "duration", "status", "driver_id", "passenger_
+        st.dataframe(long_rides[["ride_id", "duration", "status", "driver_id", "passenger_id"]])
