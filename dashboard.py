@@ -37,8 +37,31 @@ basic, intermediate, advanced, maps = st.tabs([
 
 # 📊 Basic Analytics
 with basic:
-    st.subheader("Rides by Status")
-    st.bar_chart(data["status"].value_counts())
+        st.subheader("Rides by Status")
+
+    if "status" in data.columns:
+        status_counts = data["status"].value_counts().reset_index()
+        status_counts.columns = ["status", "count"]
+
+        # Define color map with default fallback
+        status_colors = {
+            "COMPLETED": "green",
+            "CANCELLED": "red",
+            "IN_PROGRESS": "blue"
+        }
+        status_counts["color"] = status_counts["status"].map(status_colors).fillna("gray")
+
+        fig = px.bar(
+            status_counts,
+            x="status",
+            y="count",
+            color="status",
+            color_discrete_map=status_colors,
+            labels={"count": "Number of Rides", "status": "Status"},
+            title="Rides by Status"
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
 
     st.subheader("Rides by Vehicle Type")
     if "vehicle_type" in data.columns:
