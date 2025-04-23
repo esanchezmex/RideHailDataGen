@@ -56,10 +56,12 @@ The data generator simulates interactions between passengers and drivers. It:
 - `azure-storage-blob`: Azure Blob Storage integration for storing stream outputs  
 
 ## Usage Guidance
+NOTE: These are stand-alone notebooks that are meant to be run in **GOOGLE COLAB**. 
+
 To run, please begin by running the producer with the desired set of specifications. Please use the given schemas in order to run the producer without issues.
 Proceed to run the consumer_WithPrints.ipynb to perform analytics from the data being generated and streamed. Then, run the consumerWithBlob.ipynb to save the output of the analytics to Blob storage.
 
-Note: Keys have been made private for added security. Use the environment file to access them.
+NOTE: Keys have been made private for added security. Use the environment file to access them.
 
 ## File Explanations
 ### M1_01_driver_availability_schema.txt (Milestone 1)
@@ -77,7 +79,7 @@ This the data generation file from Milestone 1 but it is enhanced to integrate S
 ### ConsumerWithBlob.ipynb
 The consumer takes data from EventHub and performs a serious of Spark SQL-based queries in order to generate value for our business. It proceeds to send those results to a Blob storage container to lay those results at rest.
 
-### Consumer_WithPrints.ipynb
+### ConsumerWithPrints.ipynb
 Then, it proceeds to print those results for user visualizaiton and send them to Streamlit for real-time visualization.
 
 ### dashboard.py
