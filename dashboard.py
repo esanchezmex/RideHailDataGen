@@ -98,14 +98,11 @@ with advanced:
 
 # 📍 Location Maps
 with maps:
-    st.subheader("Pickup Locations")
+    st.subheader("🔥 Pickup Heatmap")
     if {"pickup_latitude", "pickup_longitude"}.issubset(data.columns):
         pickup_points = data[["pickup_latitude", "pickup_longitude"]].dropna().rename(
             columns={"pickup_latitude": "lat", "pickup_longitude": "lon"}
         )
-        st.map(pickup_points)
-
-        st.subheader("🔥 Pickup Heatmap")
         pickup_heatmap = pdk.Layer(
             "HeatmapLayer",
             pickup_points,
@@ -120,14 +117,11 @@ with maps:
         )
         st.pydeck_chart(pdk.Deck(layers=[pickup_heatmap], initial_view_state=view_pickup))
 
-    st.subheader("Dropoff Locations")
+    st.subheader("🔥 Dropoff Heatmap")
     if {"dropoff_latitude", "dropoff_longitude"}.issubset(data.columns):
         dropoff_points = data[["dropoff_latitude", "dropoff_longitude"]].dropna().rename(
             columns={"dropoff_latitude": "lat", "dropoff_longitude": "lon"}
         )
-        st.map(dropoff_points)
-
-        st.subheader("🔥 Dropoff Heatmap")
         dropoff_heatmap = pdk.Layer(
             "HeatmapLayer",
             dropoff_points,
