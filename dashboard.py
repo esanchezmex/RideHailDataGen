@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import pydeck as pdk
+import plotly.express as px
 
 # GitHub CSV URLs
 drivers_url = "https://raw.githubusercontent.com/esanchezmex/RideHailDataGen/main/drivers.csv"
@@ -54,93 +55,14 @@ with intermediate:
     if "payment_method" in data.columns:
         st.bar_chart(data["payment_method"].value_counts())
 
-# 📊 Advanced Analytics
-with advanced:
-    st.subheader("Rating Distribution")
-    if "driver_rating" in data.columns:
-        st.bar_chart(data["driver_rating"].value_counts().sort_index())
-
-    st.subheader("Outlier Detection: Long Rides")
-    if "ride_duration" in data.columns:
-        long_rides = data[data["ride_duration"] > data["ride_duration"].quantile(0.99)]
-        st.write("Top 1% longest rides:")
-        st.dataframe(long_rides[["request_id", "ride_duration", "status", "driver_id", "passenger_id"]])
-
-# 📍 Location Maps
-with maps:
-    st.subheader("Pickup Locations")
-    if {"pickup_latitude", "pickup_longitude"}.issubset(data.columns):
-        pickup_points = data[["pickup_latitude", "pickup_longitude"]].dropna().rename(
-            columns={"pickup_latitude": "lat", "pickup_longitude": "lon"}
-        )
-        st.map(pickup_points)
-
-        st.subheader("🔥 Pickup Heatmap")
-        pickup_heatmap = pdk.Layer(
-            "HeatmapLayer",
-            pickup_points,
-            get_position='[lon, lat]',
-            aggregation=pdk.types.String("SUM"),
-            get_weight=1
-        )
-        view_pickup = pdk.ViewState(
-            latitude=pickup_points["lat"].mean(),
-            longitude=pickup_points["lon"].mean(),
-            zoom=11
-        )
-        st.pydeck_chart(pdk.Deck(layers=[pickup_heatmap], initial_view_state=view_pickup))
-
-    st.subheader("Dropoff Locations")
-    if {"dropoff_latitude", "dropoff_longitude"}.issubset(data.columns):
-        dropoff_points = data[["dropoff_latitude", "dropoff_longitude"]].dropna().rename(
-            columns={"dropoff_latitude": "lat", "dropoff_longitude": "lon"}
-        )
-        st.map(dropoff_points)
-
-        st.subheader("🔥 Dropoff Heatmap")
-        dropoff_heatmap = pdk.Layer(
-            "HeatmapLayer",
-            dropoff_points,
-            get_position='[lon, lat]',
-            aggregation=pdk.types.String("SUM"),
-            get_weight=1
-        )
-        view_dropoff = pdk.ViewState(
-            latitude=dropoff_points["lat"].mean(),
-            longitude=dropoff_points["lon"].mean(),
-            zoom=11
-        )
-        st.pydeck_chart(pdk.Deck(layers=[dropoff_heatmap], initial_view_state=view_dropoff))
-
-    st.subheader("🚦 Ride Route Paths")
-    if {
-        "pickup_latitude", "pickup_longitude",
-        "dropoff_latitude", "dropoff_longitude"
-    }.issubset(data.columns):
-        routes = data[[
-            "pickup_latitude", "pickup_longitude",
-            "dropoff_latitude", "dropoff_longitude"
-        ]].dropna().copy()
-
-        routes = routes.rename(columns={
-            "pickup_latitude": "start_lat", "pickup_longitude": "start_lng",
-            "dropoff_latitude": "end_lat", "dropoff_longitude": "end_lng"
-        })
-
-        route_layer = pdk.Layer(
-            "LineLayer",
-            routes,
-            get_source_position='[start_lng, start_lat]',
-            get_target_position='[end_lng, end_lat]',
-            get_width=1,
-            get_color=[255, 0, 0],
-            pickable=False
-        )
-
-        route_view = pdk.ViewState(
-            latitude=routes["start_lat"].mean(),
-            longitude=routes["start_lng"].mean(),
-            zoom=11
-        )
-
-        st.pydeck_chart(pdk.Deck(layers=[route_layer], initial_view_state=route_view))
+    st.subheader("🕒 Driver Status Over Time (Timeline View)")
+    if "timestamp" in df_drivers.columns and "status" in df_drivers.columns:
+        df_drivers['timestamp'] = pd.to_datetime(df_drivers['timestamp'], errors='coerce')
+        df_drivers['hour'] = df_drivers['timestamp'].dt.floor('H')
+        timeline_df = df_drivers.groupby(['hour', 'status']).size().reset_index(name='count')
+        fig = px.bar(
+            timeline_df,
+            x='hour',
+            y='count',
+            color='status',
+            title="🕒 Driver Status Over Time
