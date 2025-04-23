@@ -11,11 +11,13 @@ passengers_url = "https://raw.githubusercontent.com/esanchezmex/RideHailDataGen/
 df_drivers = pd.read_csv(drivers_url)
 df_passengers = pd.read_csv(passengers_url)
 
-# Merge and clean
+# Merge
 data = pd.merge(df_passengers, df_drivers, on="driver_id", how="left", suffixes=("", "_driver"))
+
+# Cleanup
 data["status"] = data["status"].astype(str).str.upper()
 
-# Streamlit UI
+# Setup Streamlit
 st.set_page_config(page_title="Ride-Hailing Dashboard", layout="wide")
 st.title("🚖 Ride-Hailing Analytics Dashboard")
 
@@ -51,123 +53,4 @@ with intermediate:
         avg_duration = data.groupby("vehicle_type")["ride_duration"].mean()
         st.bar_chart(avg_duration)
 
-    st.subheader("Payment Method Distribution")
-    if "payment_method" in data.columns:
-        st.bar_chart(data["payment_method"].value_counts())
-
-    st.subheader("🕒 Driver Status Over Time (Timeline View)")
-    if "timestamp" in df_drivers.columns and "status" in df_drivers.columns:
-        df_drivers['timestamp'] = pd.to_datetime(df_drivers['timestamp'], errors='coerce')
-        df_drivers['hour'] = df_drivers['timestamp'].dt.floor('H')
-        timeline_df = df_drivers.groupby(['hour', 'status']).size().reset_index(name='count')
-        fig = px.bar(
-            timeline_df,
-            x='hour',
-            y='count',
-            color='status',
-            title="🕒 Driver Status Over Time (Hourly Buckets)",
-            labels={'count': 'Driver Count', 'hour': 'Hour'}
-        )
-        st.plotly_chart(fig, use_container_width=True)
-
-# 📊 Advanced Analytics
-with advanced:
-    st.subheader("Rating Distribution")
-    if "driver_rating" in data.columns:
-        st.bar_chart(data["driver_rating"].value_counts().sort_index())
-
-    st.subheader("Outlier Detection: Long Rides")
-    if "ride_duration" in data.columns:
-        long_rides = data[data["ride_duration"] > data["ride_duration"].quantile(0.99)]
-        st.write("Top 1% longest rides:")
-        st.dataframe(long_rides[["request_id", "ride_duration", "status", "driver_id", "passenger_id"]])
-
-# 📍 Location Maps
-with maps:
-    st.subheader("Pickup Locations")
-    if {"pickup_latitude", "pickup_longitude"}.issubset(data.columns):
-        pickup_map = data[["pickup_latitude", "pickup_longitude"]].dropna().rename(
-            columns={"pickup_latitude": "lat", "pickup_longitude": "lon"}
-        )
-        st.map(pickup_map)
-
-        st.subheader("🔥 Pickup Heatmap")
-        st.pydeck_chart(pdk.Deck(
-            map_style="mapbox://styles/mapbox/light-v9",
-            initial_view_state=pdk.ViewState(
-                latitude=pickup_map["lat"].mean(),
-                longitude=pickup_map["lon"].mean(),
-                zoom=11,
-                pitch=50,
-            ),
-            layers=[
-                pdk.Layer(
-                    "HeatmapLayer",
-                    data=pickup_map,
-                    get_position='[lon, lat]',
-                    get_weight=1,
-                    radiusPixels=60,
-                ),
-            ],
-        ))
-
-    st.subheader("Dropoff Locations")
-    if {"dropoff_latitude", "dropoff_longitude"}.issubset(data.columns):
-        dropoff_map = data[["dropoff_latitude", "dropoff_longitude"]].dropna().rename(
-            columns={"dropoff_latitude": "lat", "dropoff_longitude": "lon"}
-        )
-        st.map(dropoff_map)
-
-        st.subheader("🔥 Dropoff Heatmap")
-        st.pydeck_chart(pdk.Deck(
-            map_style="mapbox://styles/mapbox/light-v9",
-            initial_view_state=pdk.ViewState(
-                latitude=dropoff_map["lat"].mean(),
-                longitude=dropoff_map["lon"].mean(),
-                zoom=11,
-                pitch=50,
-            ),
-            layers=[
-                pdk.Layer(
-                    "HeatmapLayer",
-                    data=dropoff_map,
-                    get_position='[lon, lat]',
-                    get_weight=1,
-                    radiusPixels=60,
-                ),
-            ],
-        ))
-
-    st.subheader("🚦 Ride Route Paths")
-    if {
-        "pickup_latitude", "pickup_longitude",
-        "dropoff_latitude", "dropoff_longitude"
-    }.issubset(data.columns):
-        routes = data[[
-            "pickup_latitude", "pickup_longitude",
-            "dropoff_latitude", "dropoff_longitude"
-        ]].dropna().copy()
-
-        routes = routes.rename(columns={
-            "pickup_latitude": "start_lat", "pickup_longitude": "start_lng",
-            "dropoff_latitude": "end_lat", "dropoff_longitude": "end_lng"
-        })
-
-        layer = pdk.Layer(
-            "LineLayer",
-            routes,
-            get_source_position='[start_lng, start_lat]',
-            get_target_position='[end_lng, end_lat]',
-            get_width=2,
-            get_color=[255, 100, 100],
-            pickable=True
-        )
-
-        midpoint = (routes["start_lat"].mean(), routes["start_lng"].mean())
-        view_state = pdk.ViewState(latitude=midpoint[0], longitude=midpoint[1], zoom=11, pitch=0)
-
-        st.pydeck_chart(pdk.Deck(
-            map_style='mapbox://styles/mapbox/light-v9',
-            initial_view_state=view_state,
-            layers=[layer]
-        ))
+    st.subheader("
